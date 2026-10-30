@@ -20,7 +20,8 @@ import {
   ArrowLeftRight,
   ClipboardList,
   HelpCircle,
-  X
+  X,
+  SlidersHorizontal,
 } from 'lucide-react';
 import {
   RestaurantId,
@@ -52,7 +53,7 @@ const DEFAULT_META: Record<RestaurantId, RestaurantMeta> = {
   myaso_ryba: {
     id: 'myaso_ryba',
     name: 'Мясо&Рыба',
-    subtitle: 'Стейк-хаус и фиш-хаус с высоким средним чеком и широкой винной картой',
+    subtitle: 'Стейк-хаус и фиш-хаус с высоким средним чеком и винной картой',
     addressNote: '',
     interviewerName: '',
     interviewDate: new Date().toISOString().split('T')[0],
@@ -66,7 +67,7 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<QuestionCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showUnansweredOnly, setShowUnansweredOnly] = useState(false);
-  const [isMetaExpanded, setIsMetaExpanded] = useState(true);
+  const [isMetaExpanded, setIsMetaExpanded] = useState(false);
   const [isAddingQuestion, setIsAddingQuestion] = useState(false);
   const [newQuestionTitle, setNewQuestionTitle] = useState('');
   const [newQuestionHint, setNewQuestionHint] = useState('');
@@ -96,7 +97,7 @@ export default function App() {
     return DEFAULT_META;
   });
 
-  // Custom questions added by the user
+  // Custom questions added by user
   const [customQuestions, setCustomQuestions] = useState<InterviewQuestion[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_CUSTOM_Q);
@@ -107,7 +108,7 @@ export default function App() {
     return [];
   });
 
-  // Save to localStorage on change
+  // Save to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY_ANSWERS, JSON.stringify(answers));
@@ -170,7 +171,6 @@ export default function App() {
     let newText = '';
 
     if (currentText.includes(optionText)) {
-      // Remove option cleanly
       newText = currentText
         .split(', ')
         .filter((part) => part.trim() !== optionText)
@@ -350,17 +350,22 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 pb-24 lg:pb-12">
-      {/* Top Bar following strict 3-zone contract */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-stone-200 px-4 sm:px-6 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 sm:gap-8">
-          {/* Zone 1: Brand Title */}
-          <a
-            href="#top"
-            className="text-base sm:text-lg font-bold tracking-tight text-stone-950 whitespace-nowrap shrink-0"
-          >
-            Собеседование: Официант
-          </a>
+    <div className="w-full max-w-full overflow-x-hidden min-h-screen bg-stone-50 text-stone-900 pb-28 sm:pb-16">
+      {/* Top Bar strictly contained for mobile screens */}
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-stone-200 px-3 sm:px-6 py-2.5 sm:py-3 w-full max-w-full">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-6 min-w-0">
+          {/* Zone 1: Title with truncate protection */}
+          <div className="min-w-0 flex-1">
+            <a
+              href="#top"
+              className="block text-sm sm:text-base md:text-lg font-bold tracking-tight text-stone-950 truncate"
+            >
+              Собеседование: Официант
+            </a>
+            <div className="text-[11px] text-stone-500 truncate sm:hidden">
+              THE БЫК · Мясо&Рыба
+            </div>
+          </div>
 
           {/* Zone 2: Desktop Navigation Switcher */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-stone-600">
@@ -396,21 +401,23 @@ export default function App() {
             </button>
           </nav>
 
-          {/* Zone 3: 1 Primary Action */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Zone 3: 1 Primary Action (Mobile-adapted button) */}
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={handleCopySummary}
-              className="min-h-[40px] px-3.5 py-2 text-xs sm:text-sm font-medium text-white bg-stone-900 rounded-xl hover:bg-stone-800 active:scale-[0.98] transition-all flex items-center gap-2 whitespace-nowrap shrink-0"
+              className="min-h-[38px] px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-medium text-white bg-stone-900 rounded-xl hover:bg-stone-800 active:scale-[0.98] transition-all flex items-center gap-1.5 shrink-0"
+              title="Скопировать все ответы в буфер"
             >
               {copiedFeedback ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-400" />
-                  <span>Скопировано</span>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-xs">Скопировано</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-4 h-4" />
-                  <span>Скопировать ответы</span>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Скопировать ответы</span>
+                  <span className="sm:hidden text-xs">Копия</span>
                 </>
               )}
             </button>
@@ -418,185 +425,183 @@ export default function App() {
         </div>
       </header>
 
-      <main id="top" className="max-w-7xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6">
-        {/* Restaurant Switcher Banner for Mobile & Quick Status */}
-        <section className="mb-5">
-          <div className="grid grid-cols-3 gap-2 p-1.5 bg-stone-200/80 rounded-2xl">
+      <main id="top" className="w-full max-w-7xl mx-auto px-3 sm:px-6 pt-3 sm:pt-6">
+        {/* Restaurant Segmented Control adapted for mobile phone width */}
+        <section className="mb-4 w-full max-w-full">
+          <div className="grid grid-cols-3 gap-1 p-1 bg-stone-200/80 rounded-xl sm:rounded-2xl w-full">
             <button
               onClick={() => setActiveTab('the_byk')}
-              className={`min-h-[48px] px-3 py-2 rounded-xl text-left transition-all flex flex-col justify-center ${
+              className={`min-h-[44px] px-2 py-1.5 rounded-lg sm:rounded-xl text-left transition-all flex flex-col justify-center min-w-0 overflow-hidden ${
                 activeTab === 'the_byk'
                   ? 'bg-white text-stone-950 shadow-sm border border-stone-200/80'
                   : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-xs sm:text-sm font-bold tracking-tight whitespace-nowrap truncate">
-                  1. THE БЫК
+              <div className="flex items-center justify-between gap-1 w-full min-w-0">
+                <span className="text-xs sm:text-sm font-bold tracking-tight truncate">
+                  THE БЫК
                 </span>
-                <span className="font-mono text-xs font-semibold text-amber-700 tabular-nums">
+                <span className="font-mono text-[11px] sm:text-xs font-semibold text-amber-800 tabular-nums shrink-0">
                   {bykStats.answeredCount}/{bykStats.totalCount}
                 </span>
               </div>
-              <span className="text-[11px] text-stone-500 truncate hidden sm:inline">
-                Фикс-прайс · Высокий поток
+              <span className="text-[10px] text-stone-500 truncate hidden sm:block">
+                Фикс-прайс · Поток
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab('myaso_ryba')}
-              className={`min-h-[48px] px-3 py-2 rounded-xl text-left transition-all flex flex-col justify-center ${
+              className={`min-h-[44px] px-2 py-1.5 rounded-lg sm:rounded-xl text-left transition-all flex flex-col justify-center min-w-0 overflow-hidden ${
                 activeTab === 'myaso_ryba'
                   ? 'bg-white text-stone-950 shadow-sm border border-stone-200/80'
                   : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-xs sm:text-sm font-bold tracking-tight whitespace-nowrap truncate">
-                  2. Мясо&Рыба
+              <div className="flex items-center justify-between gap-1 w-full min-w-0">
+                <span className="text-xs sm:text-sm font-bold tracking-tight truncate">
+                  Мясо&Рыба
                 </span>
-                <span className="font-mono text-xs font-semibold text-teal-700 tabular-nums">
+                <span className="font-mono text-[11px] sm:text-xs font-semibold text-teal-800 tabular-nums shrink-0">
                   {mrStats.answeredCount}/{mrStats.totalCount}
                 </span>
               </div>
-              <span className="text-[11px] text-stone-500 truncate hidden sm:inline">
-                Стейки и морепродукты · Высокий чек
+              <span className="text-[10px] text-stone-500 truncate hidden sm:block">
+                Стейки · Чек
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab('compare')}
-              className={`min-h-[48px] px-3 py-2 rounded-xl text-left transition-all flex flex-col justify-center ${
+              className={`min-h-[44px] px-2 py-1.5 rounded-lg sm:rounded-xl text-left transition-all flex flex-col justify-center min-w-0 overflow-hidden ${
                 activeTab === 'compare'
                   ? 'bg-stone-900 text-white shadow-sm'
                   : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-xs sm:text-sm font-bold tracking-tight whitespace-nowrap truncate">
+              <div className="flex items-center justify-between gap-1 w-full min-w-0">
+                <span className="text-xs sm:text-sm font-bold tracking-tight truncate">
                   Сравнение
                 </span>
                 <ArrowLeftRight className="w-3.5 h-3.5 shrink-0 opacity-80" />
               </div>
               <span
-                className={`text-[11px] truncate hidden sm:inline ${
+                className={`text-[10px] truncate hidden sm:block ${
                   activeTab === 'compare' ? 'text-stone-300' : 'text-stone-500'
                 }`}
               >
-                Оба ресторана рядом
+                2 ресторана
               </span>
             </button>
           </div>
         </section>
 
-        {/* Single Restaurant Details Card (When in THE БЫК or Мясо&Рыба mode) */}
+        {/* Single Restaurant Details Card */}
         {activeTab !== 'compare' && (
-          <section className="mb-6 bg-white rounded-2xl border border-stone-200 p-4 sm:p-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 text-xs text-stone-500 mb-1">
+          <section className="mb-4 bg-white rounded-2xl border border-stone-200 p-3.5 sm:p-5 w-full max-w-full">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 min-w-0">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-stone-500 mb-0.5 flex-wrap">
                   <span>Карточка собеседования</span>
                   <span aria-hidden="true">·</span>
-                  <span>Автосохранение в телефоне</span>
-                  <span aria-hidden="true">·</span>
-                  <span className="font-mono tabular-nums">
-                    Заполнено {getProgressStats(currentRestaurantId).percent}%
+                  <span className="font-mono tabular-nums text-stone-700 font-semibold">
+                    Заполнено {getProgressStats(currentRestaurantId).percent}% ({getProgressStats(currentRestaurantId).answeredCount}/{getProgressStats(currentRestaurantId).totalCount})
                   </span>
                 </div>
-                <h1 className="text-xl sm:text-2xl font-bold text-stone-950 tracking-tight">
+                <h1 className="text-lg sm:text-2xl font-bold text-stone-950 tracking-tight truncate">
                   {meta[currentRestaurantId].name}
                 </h1>
-                <p className="text-xs sm:text-sm text-stone-600 mt-0.5">
+                <p className="text-xs text-stone-600 mt-0.5 line-clamp-1 sm:line-clamp-none">
                   {meta[currentRestaurantId].subtitle}
                 </p>
               </div>
 
               <button
                 onClick={() => setIsMetaExpanded(!isMetaExpanded)}
-                className="min-h-[44px] px-3 py-2 rounded-xl border border-stone-200 text-xs font-medium text-stone-700 hover:bg-stone-50 flex items-center gap-1.5 shrink-0"
+                className="w-full sm:w-auto min-h-[38px] px-3 py-1.5 rounded-xl border border-stone-200 text-xs font-medium text-stone-700 hover:bg-stone-50 flex items-center justify-center gap-1.5 shrink-0 self-start"
               >
-                <span>{isMetaExpanded ? 'Свернуть инфо' : 'Детали встречи'}</span>
-                {isMetaExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                <span>{isMetaExpanded ? 'Скрыть детали' : 'Детали встречи'}</span>
+                {isMetaExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               </button>
             </div>
 
             {isMetaExpanded && (
-              <div className="mt-4 pt-4 border-t border-stone-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="mt-3.5 pt-3.5 border-t border-stone-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                 <div>
-                  <label className="block text-xs font-medium text-stone-600 mb-1">
+                  <label className="block text-[11px] sm:text-xs font-medium text-stone-600 mb-1">
                     Филиал / Метро / Адрес
                   </label>
                   <div className="relative">
-                    <MapPin className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
+                    <MapPin className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-3" />
                     <input
                       type="text"
                       value={meta[currentRestaurantId].addressNote}
                       onChange={(e) => handleUpdateMeta(currentRestaurantId, 'addressNote', e.target.value)}
-                      placeholder="Например: м. Тверская / ТРЦ..."
-                      className="w-full min-h-[42px] pl-9 pr-3 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
+                      placeholder="м. Тверская / ТЦ..."
+                      className="w-full min-h-[38px] pl-8 pr-3 py-1.5 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-stone-600 mb-1">
-                    Кто проводит (Имя и телефон)
+                  <label className="block text-[11px] sm:text-xs font-medium text-stone-600 mb-1">
+                    Кто проводит (Имя и контакты)
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
+                    <User className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-3" />
                     <input
                       type="text"
                       value={meta[currentRestaurantId].interviewerName}
                       onChange={(e) => handleUpdateMeta(currentRestaurantId, 'interviewerName', e.target.value)}
                       placeholder="Менеджер Анна..."
-                      className="w-full min-h-[42px] pl-9 pr-3 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
+                      className="w-full min-h-[38px] pl-8 pr-3 py-1.5 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-stone-600 mb-1">
-                    Обещанный доход за смену (итог)
+                  <label className="block text-[11px] sm:text-xs font-medium text-stone-600 mb-1">
+                    Обещанный доход за смену
                   </label>
                   <div className="relative">
-                    <Wallet className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
+                    <Wallet className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-3" />
                     <input
                       type="text"
                       value={meta[currentRestaurantId].expectedIncomeDay}
                       onChange={(e) => handleUpdateMeta(currentRestaurantId, 'expectedIncomeDay', e.target.value)}
-                      placeholder="Например: 6 500 – 9 000 ₽/смена"
-                      className="w-full min-h-[42px] pl-9 pr-3 py-2 text-sm font-mono bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
+                      placeholder="6 000 – 9 000 ₽"
+                      className="w-full min-h-[38px] pl-8 pr-3 py-1.5 text-xs sm:text-sm font-mono bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-stone-600 mb-1">
+                  <label className="block text-[11px] sm:text-xs font-medium text-stone-600 mb-1">
                     Дата собеседования
                   </label>
                   <div className="relative">
-                    <Calendar className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
+                    <Calendar className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-3" />
                     <input
                       type="date"
                       value={meta[currentRestaurantId].interviewDate}
                       onChange={(e) => handleUpdateMeta(currentRestaurantId, 'interviewDate', e.target.value)}
-                      className="w-full min-h-[42px] pl-9 pr-3 py-2 text-sm font-mono bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
+                      className="w-full min-h-[38px] pl-8 pr-3 py-1.5 text-xs sm:text-sm font-mono bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
                     />
                   </div>
                 </div>
 
                 <div className="sm:col-span-2 lg:col-span-4">
-                  <label className="block text-xs font-medium text-stone-600 mb-1">
-                    Общее впечатление от атмосферы, менеджера и зала
+                  <label className="block text-[11px] sm:text-xs font-medium text-stone-600 mb-1">
+                    Впечатление от зала, менеджера и кухни
                   </label>
                   <div className="relative">
-                    <FileText className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
+                    <FileText className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-3" />
                     <input
                       type="text"
                       value={meta[currentRestaurantId].overallNotes}
                       onChange={(e) => handleUpdateMeta(currentRestaurantId, 'overallNotes', e.target.value)}
-                      placeholder="Адекватность руководства, загруженность зала, чистота на раздаче, когда дадут ответ..."
-                      className="w-full min-h-[42px] pl-9 pr-3 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
+                      placeholder="Атмосфера в коллективе, чистота, загрузка..."
+                      className="w-full min-h-[38px] pl-8 pr-3 py-1.5 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
                     />
                   </div>
                 </div>
@@ -606,129 +611,130 @@ export default function App() {
         )}
 
         {/* Filter & Search Toolbar */}
-        <section className="mb-5 space-y-3">
-          {/* Category Horizontal Scroller */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-            {CATEGORIES.map((cat) => {
-              const count =
-                cat.id === 'all'
-                  ? allQuestions.length
-                  : allQuestions.filter((q) => q.category === cat.id).length;
+        <section className="mb-4 space-y-2.5 w-full max-w-full">
+          {/* Horizontal Category Scroller strictly contained */}
+          <div className="w-full max-w-full overflow-x-auto no-scrollbar pb-1">
+            <div className="flex items-center gap-1.5 w-max">
+              {CATEGORIES.map((cat) => {
+                const count =
+                  cat.id === 'all'
+                    ? allQuestions.length
+                    : allQuestions.filter((q) => q.category === cat.id).length;
 
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                    selectedCategory === cat.id
-                      ? 'bg-stone-900 text-white'
-                      : 'bg-white text-stone-700 border border-stone-200 hover:bg-stone-100'
-                  }`}
-                >
-                  <span>{cat.label}</span>
-                  <span
-                    className={`font-mono text-xs tabular-nums ${
-                      selectedCategory === cat.id ? 'text-stone-300' : 'text-stone-400'
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`min-h-[36px] px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+                      selectedCategory === cat.id
+                        ? 'bg-stone-900 text-white'
+                        : 'bg-white text-stone-700 border border-stone-200 hover:bg-stone-100'
                     }`}
                   >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
+                    <span>{cat.label}</span>
+                    <span
+                      className={`font-mono text-[11px] tabular-nums ${
+                        selectedCategory === cat.id ? 'text-stone-300' : 'text-stone-400'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Search, Unanswered Filter & Add Custom Question Trigger */}
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="relative flex-1 min-w-[220px]">
-              <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Поиск вопроса (чай, штрафы, график, чек, такси)..."
-                className="w-full min-h-[42px] pl-10 pr-8 py-2 text-sm bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-2.5 p-1 text-stone-400 hover:text-stone-700"
-                  aria-label="Очистить поиск"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              {activeTab !== 'compare' && (
-                <button
-                  onClick={() => setShowUnansweredOnly(!showUnansweredOnly)}
-                  className={`min-h-[42px] px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium border transition-colors whitespace-nowrap shrink-0 ${
-                    showUnansweredOnly
-                      ? 'bg-amber-50 border-amber-300 text-amber-900'
-                      : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-100'
-                  }`}
-                >
-                  {showUnansweredOnly ? 'Показаны без ответа' : 'Только без ответа'}
-                </button>
-              )}
-
+          {/* Search Input (100% width on mobile) */}
+          <div className="relative w-full">
+            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-2.5" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Поиск (чай, штрафы, график, чек)..."
+              className="w-full min-h-[38px] pl-9 pr-8 py-1.5 text-xs sm:text-sm bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900"
+            />
+            {searchQuery && (
               <button
-                onClick={() => setIsAddingQuestion(!isAddingQuestion)}
-                className="min-h-[42px] px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white border border-stone-200 text-stone-900 hover:bg-stone-100 flex items-center gap-1.5 whitespace-nowrap shrink-0"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-2 p-1 text-stone-400 hover:text-stone-700"
+                aria-label="Очистить поиск"
               >
-                <Plus className="w-4 h-4" />
-                <span>Добавить свой вопрос</span>
+                <X className="w-3.5 h-3.5" />
               </button>
+            )}
+          </div>
 
+          {/* Action and Filter Buttons (Responsive Grid on Mobile) */}
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 w-full">
+            {activeTab !== 'compare' && (
               <button
-                onClick={handleDownloadCSV}
-                className="min-h-[42px] px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white border border-stone-200 text-stone-700 hover:bg-stone-100 flex items-center gap-1.5 whitespace-nowrap shrink-0"
-                title="Скачать таблицу в Excel (CSV)"
+                onClick={() => setShowUnansweredOnly(!showUnansweredOnly)}
+                className={`min-h-[36px] px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-colors truncate text-center ${
+                  showUnansweredOnly
+                    ? 'bg-amber-100 border-amber-300 text-amber-950 font-semibold'
+                    : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-100'
+                }`}
               >
-                <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">Скачать Excel (CSV)</span>
+                {showUnansweredOnly ? '✓ Без ответа' : 'Только без ответа'}
               </button>
-            </div>
+            )}
+
+            <button
+              onClick={() => setIsAddingQuestion(!isAddingQuestion)}
+              className="min-h-[36px] px-2.5 py-1.5 rounded-xl text-xs font-medium bg-white border border-stone-200 text-stone-900 hover:bg-stone-100 flex items-center justify-center gap-1 truncate"
+            >
+              <Plus className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">Свой вопрос</span>
+            </button>
+
+            <button
+              onClick={handleDownloadCSV}
+              className="col-span-2 sm:col-span-1 min-h-[36px] px-2.5 py-1.5 rounded-xl text-xs font-medium bg-white border border-stone-200 text-stone-700 hover:bg-stone-100 flex items-center justify-center gap-1 truncate"
+              title="Скачать таблицу в Excel (CSV)"
+            >
+              <Download className="w-3.5 h-3.5 shrink-0" />
+              <span>Скачать в Excel (CSV)</span>
+            </button>
           </div>
 
           {/* Add Custom Question Form */}
           {isAddingQuestion && (
             <form
               onSubmit={handleAddCustomQuestion}
-              className="bg-white border border-stone-300 rounded-2xl p-4 space-y-3"
+              className="bg-white border border-stone-300 rounded-2xl p-3 sm:p-4 space-y-2.5 w-full max-w-full"
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-stone-900">Добавить свой вопрос в таблицу</h3>
+                <h3 className="text-xs sm:text-sm font-bold text-stone-900">Добавить свой вопрос</h3>
                 <button
                   type="button"
                   onClick={() => setIsAddingQuestion(false)}
-                  className="text-xs text-stone-500 hover:text-stone-800"
+                  className="text-xs text-stone-500 hover:text-stone-800 p-1"
                 >
-                  Закрыть
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="sm:col-span-2">
-                  <label className="block text-xs text-stone-600 mb-1">Формулировка вопроса *</label>
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-[11px] text-stone-600 mb-1">Формулировка вопроса *</label>
                   <input
                     type="text"
                     required
                     value={newQuestionTitle}
                     onChange={(e) => setNewQuestionTitle(e.target.value)}
-                    placeholder="Например: Есть ли скидка для сотрудников в меню?"
-                    className="w-full min-h-[42px] px-3 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
+                    placeholder="Например: Есть ли скидка на меню для сотрудников?"
+                    className="w-full min-h-[38px] px-3 py-1.5 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-stone-600 mb-1">Категория</label>
+                  <label className="block text-[11px] text-stone-600 mb-1">Категория</label>
                   <select
                     value={newQuestionCategory}
                     onChange={(e) =>
                       setNewQuestionCategory(e.target.value as Exclude<QuestionCategory, 'all'>)
                     }
-                    className="w-full min-h-[42px] px-3 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
+                    className="w-full min-h-[38px] px-3 py-1.5 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
                   >
                     <option value="base">Ваши основные вопросы</option>
                     <option value="money">Деньги и Чай</option>
@@ -737,10 +743,8 @@ export default function App() {
                     <option value="workplace">Быт и Команда</option>
                   </select>
                 </div>
-              </div>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs text-stone-600 mb-1">
+                <div>
+                  <label className="block text-[11px] text-stone-600 mb-1">
                     Подсказка (на что обратить внимание)
                   </label>
                   <input
@@ -748,12 +752,12 @@ export default function App() {
                     value={newQuestionHint}
                     onChange={(e) => setNewQuestionHint(e.target.value)}
                     placeholder="Необязательно..."
-                    className="w-full min-h-[42px] px-3 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
+                    className="w-full min-h-[38px] px-3 py-1.5 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="min-h-[42px] px-5 py-2 bg-stone-900 text-white text-sm font-medium rounded-xl hover:bg-stone-800 whitespace-nowrap shrink-0"
+                  className="w-full min-h-[38px] px-4 py-2 bg-stone-900 text-white text-xs font-medium rounded-xl hover:bg-stone-800"
                 >
                   Сохранить вопрос
                 </button>
@@ -762,13 +766,13 @@ export default function App() {
           )}
         </section>
 
-        {/* MODE 1 & 2: SINGLE RESTAURANT INTERACTIVE CARDS (Optimized for Mobile Input) */}
+        {/* MODE 1 & 2: SINGLE RESTAURANT CARDS (Fully adapted for mobile phone viewports) */}
         {activeTab !== 'compare' ? (
-          <section className="space-y-3">
+          <section className="space-y-3 w-full max-w-full">
             {filteredQuestions.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center">
-                <p className="text-base font-semibold text-stone-900">Вопросы не найдены</p>
-                <p className="text-sm text-stone-500 mt-1">
+              <div className="bg-white rounded-2xl border border-stone-200 p-6 text-center w-full">
+                <p className="text-sm font-semibold text-stone-900">Вопросы не найдены</p>
+                <p className="text-xs text-stone-500 mt-1">
                   Попробуйте сбросить фильтр или поисковый запрос.
                 </p>
                 <button
@@ -777,13 +781,13 @@ export default function App() {
                     setSearchQuery('');
                     setShowUnansweredOnly(false);
                   }}
-                  className="mt-4 min-h-[42px] px-4 py-2 bg-stone-900 text-white text-xs font-medium rounded-xl"
+                  className="mt-3 min-h-[36px] px-3.5 py-1.5 bg-stone-900 text-white text-xs font-medium rounded-xl"
                 >
                   Показать все вопросы
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 w-full">
                 {filteredQuestions.map((q, index) => {
                   const currentAns = answers[currentRestaurantId]?.[q.id] || { text: '' };
                   const isAnswered = currentAns.text.trim().length > 0;
@@ -792,29 +796,29 @@ export default function App() {
                   return (
                     <div
                       key={q.id}
-                      className={`bg-white rounded-2xl border transition-colors p-4 sm:p-5 flex flex-col justify-between ${
+                      className={`bg-white rounded-2xl border transition-colors p-3.5 sm:p-5 flex flex-col justify-between w-full max-w-full overflow-hidden ${
                         isAnswered ? 'border-stone-300' : 'border-stone-200'
                       }`}
                     >
-                      <div>
+                      <div className="min-w-0">
                         {/* Quiet unboxed metadata line */}
-                        <div className="flex items-center justify-between gap-2 text-xs text-stone-500 mb-1.5">
-                          <div className="flex items-center gap-1.5 flex-wrap">
+                        <div className="flex items-center justify-between gap-1 text-[11px] text-stone-500 mb-1.5">
+                          <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                             <span className="font-mono font-semibold text-stone-700 tabular-nums">
                               {String(index + 1).padStart(2, '0')}.
                             </span>
-                            <span>{q.categoryLabel}</span>
+                            <span className="truncate">{q.categoryLabel}</span>
                             {q.isUserProvided && (
                               <>
                                 <span aria-hidden="true">·</span>
-                                <span className="text-amber-800 font-medium">Ваш базовый список</span>
+                                <span className="text-amber-800 font-medium">Базовый</span>
                               </>
                             )}
                             {currentAns.updatedAt && isAnswered && (
                               <>
                                 <span aria-hidden="true">·</span>
-                                <span className="font-mono text-[11px] text-emerald-700">
-                                  Сохранено в {currentAns.updatedAt}
+                                <span className="font-mono text-[10px] text-emerald-700">
+                                  {currentAns.updatedAt}
                                 </span>
                               </>
                             )}
@@ -823,7 +827,7 @@ export default function App() {
                           {isCustom && (
                             <button
                               onClick={() => handleDeleteCustomQuestion(q.id)}
-                              className="text-stone-400 hover:text-red-600 p-1"
+                              className="text-stone-400 hover:text-red-600 p-1 shrink-0"
                               title="Удалить свой вопрос"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -832,23 +836,23 @@ export default function App() {
                         </div>
 
                         {/* Question Title */}
-                        <h2 className="text-base sm:text-lg font-bold text-stone-950 leading-snug">
+                        <h2 className="text-sm sm:text-base font-bold text-stone-950 leading-snug break-words">
                           {q.title}
                         </h2>
 
                         {/* Recruiter / Waiter Insider Hint */}
-                        <p className="text-xs text-stone-600 mt-1.5 leading-relaxed flex items-start gap-1.5">
+                        <p className="text-xs text-stone-600 mt-1 leading-relaxed flex items-start gap-1.5 break-words">
                           <HelpCircle className="w-3.5 h-3.5 text-stone-400 shrink-0 mt-0.5" />
                           <span>{q.hint}</span>
                         </p>
 
                         {/* Quick Tap Buttons for fast one-handed mobile entry */}
                         {q.quickOptions && q.quickOptions.length > 0 && (
-                          <div className="mt-3">
-                            <span className="block text-[11px] text-stone-400 mb-1.5">
-                              Быстрый ввод (нажми, чтобы подставить в ответ):
+                          <div className="mt-2.5">
+                            <span className="block text-[10px] text-stone-400 mb-1">
+                              Быстрый ввод в ответ:
                             </span>
-                            <div className="flex flex-wrap gap-1.5">
+                            <div className="flex flex-wrap gap-1 max-w-full">
                               {q.quickOptions.map((opt) => {
                                 const isSelected = currentAns.text.includes(opt);
                                 return (
@@ -858,7 +862,7 @@ export default function App() {
                                     onClick={() =>
                                       handleToggleQuickOption(currentRestaurantId, q.id, opt)
                                     }
-                                    className={`min-h-[36px] px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors text-left ${
+                                    className={`min-h-[32px] px-2 py-1 rounded-lg text-[11px] font-medium transition-colors text-left max-w-full break-words leading-tight ${
                                       isSelected
                                         ? 'bg-stone-900 text-white'
                                         : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
@@ -874,7 +878,7 @@ export default function App() {
                       </div>
 
                       {/* Answer Input & Condition Rating */}
-                      <div className="mt-3 pt-3 border-t border-stone-100">
+                      <div className="mt-3 pt-2.5 border-t border-stone-100 w-full min-w-0">
                         <textarea
                           rows={2}
                           value={currentAns.text}
@@ -885,13 +889,13 @@ export default function App() {
                             q.placeholder ||
                             `Запишите ответ работодателя (${meta[currentRestaurantId].name})...`
                           }
-                          className="w-full p-3 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900 resize-y"
+                          className="w-full p-2.5 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900 resize-y"
                         />
 
                         {/* Evaluation of employer's answer (Плюс / Норм / Минус) */}
-                        <div className="flex items-center justify-between gap-2 mt-2">
-                          <span className="text-xs text-stone-500">Оценка условий:</span>
-                          <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5 mt-2">
+                          <span className="text-[11px] text-stone-500">Оценка:</span>
+                          <div className="flex items-center gap-1 shrink-0">
                             <button
                               type="button"
                               onClick={() =>
@@ -899,13 +903,13 @@ export default function App() {
                                   rating: currentAns.rating === 'good' ? undefined : 'good',
                                 })
                               }
-                              className={`min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors ${
+                              className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors ${
                                 currentAns.rating === 'good'
                                   ? 'bg-emerald-700 text-white'
                                   : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                               }`}
                             >
-                              <ThumbsUp className="w-3.5 h-3.5" />
+                              <ThumbsUp className="w-3 h-3" />
                               <span>Плюс</span>
                             </button>
 
@@ -916,13 +920,13 @@ export default function App() {
                                   rating: currentAns.rating === 'neutral' ? undefined : 'neutral',
                                 })
                               }
-                              className={`min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors ${
+                              className={`min-h-[32px] px-2 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors ${
                                 currentAns.rating === 'neutral'
                                   ? 'bg-stone-700 text-white'
                                   : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                               }`}
                             >
-                              <Minus className="w-3.5 h-3.5" />
+                              <Minus className="w-3 h-3" />
                               <span>Норм</span>
                             </button>
 
@@ -933,13 +937,13 @@ export default function App() {
                                   rating: currentAns.rating === 'bad' ? undefined : 'bad',
                                 })
                               }
-                              className={`min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors ${
+                              className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors ${
                                 currentAns.rating === 'bad'
                                   ? 'bg-red-700 text-white'
                                   : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                               }`}
                             >
-                              <ThumbsDown className="w-3.5 h-3.5" />
+                              <ThumbsDown className="w-3 h-3" />
                               <span>Минус</span>
                             </button>
                           </div>
@@ -952,73 +956,206 @@ export default function App() {
             )}
           </section>
         ) : (
-          /* MODE 3: SIDE-BY-SIDE COMPARISON TABLE (THE БЫК vs МЯСО&РЫБА) */
-          <section className="space-y-5">
-            {/* Summary Scoreboard Banner */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-5">
+          /* MODE 3: COMPARISON VIEW */
+          <section className="space-y-4 w-full max-w-full">
+            {/* Scoreboard Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full">
+              <div className="bg-white rounded-2xl border border-stone-200 p-3.5">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs text-stone-500">Раздел 1</span>
-                    <h2 className="text-lg font-bold text-stone-950">THE БЫК</h2>
-                  </div>
+                  <h2 className="text-sm font-bold text-stone-950">1. THE БЫК</h2>
                   <button
                     onClick={() => setActiveTab('the_byk')}
-                    className="min-h-[38px] px-3 py-1.5 text-xs font-medium bg-stone-100 hover:bg-stone-200 rounded-xl text-stone-800"
+                    className="text-xs text-amber-800 font-semibold hover:underline"
                   >
-                    Редактировать раздел →
+                    В раздел →
                   </button>
                 </div>
-                <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-600 font-mono tabular-nums">
+                <div className="mt-2 pt-2 border-t border-stone-100 flex items-center justify-between text-xs text-stone-600 font-mono tabular-nums">
                   <span>Ответов: {bykStats.answeredCount}/{bykStats.totalCount}</span>
-                  <span className="text-emerald-700 font-semibold">Плюсов: {bykStats.goodCount}</span>
-                  <span className="text-red-700 font-semibold">Минусов: {bykStats.badCount}</span>
+                  <span className="text-emerald-700 font-semibold">+{bykStats.goodCount}</span>
+                  <span className="text-red-700 font-semibold">−{bykStats.badCount}</span>
                 </div>
                 {meta.the_byk.expectedIncomeDay && (
-                  <p className="mt-2 text-xs text-stone-700">
-                    Ожидаемый доход: <strong className="font-mono">{meta.the_byk.expectedIncomeDay}</strong>
+                  <p className="mt-1.5 text-xs text-stone-700 truncate">
+                    Доход: <strong className="font-mono">{meta.the_byk.expectedIncomeDay}</strong>
                   </p>
                 )}
               </div>
 
-              <div className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-5">
+              <div className="bg-white rounded-2xl border border-stone-200 p-3.5">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs text-stone-500">Раздел 2</span>
-                    <h2 className="text-lg font-bold text-stone-950">Мясо&Рыба</h2>
-                  </div>
+                  <h2 className="text-sm font-bold text-stone-950">2. Мясо&Рыба</h2>
                   <button
                     onClick={() => setActiveTab('myaso_ryba')}
-                    className="min-h-[38px] px-3 py-1.5 text-xs font-medium bg-stone-100 hover:bg-stone-200 rounded-xl text-stone-800"
+                    className="text-xs text-teal-800 font-semibold hover:underline"
                   >
-                    Редактировать раздел →
+                    В раздел →
                   </button>
                 </div>
-                <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-600 font-mono tabular-nums">
+                <div className="mt-2 pt-2 border-t border-stone-100 flex items-center justify-between text-xs text-stone-600 font-mono tabular-nums">
                   <span>Ответов: {mrStats.answeredCount}/{mrStats.totalCount}</span>
-                  <span className="text-emerald-700 font-semibold">Плюсов: {mrStats.goodCount}</span>
-                  <span className="text-red-700 font-semibold">Минусов: {mrStats.badCount}</span>
+                  <span className="text-emerald-700 font-semibold">+{mrStats.goodCount}</span>
+                  <span className="text-red-700 font-semibold">−{mrStats.badCount}</span>
                 </div>
                 {meta.myaso_ryba.expectedIncomeDay && (
-                  <p className="mt-2 text-xs text-stone-700">
-                    Ожидаемый доход: <strong className="font-mono">{meta.myaso_ryba.expectedIncomeDay}</strong>
+                  <p className="mt-1.5 text-xs text-stone-700 truncate">
+                    Доход: <strong className="font-mono">{meta.myaso_ryba.expectedIncomeDay}</strong>
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Interactive Comparison Table (Editable directly in cells!) */}
-            <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
-              <div className="overflow-x-auto">
+            {/* MOBILE COMPARISON CARD LIST (Zero horizontal overflow on smartphones) */}
+            <div className="block sm:hidden space-y-3 w-full">
+              {filteredQuestions.map((q, idx) => {
+                const bykAns = answers.the_byk?.[q.id] || { text: '' };
+                const mrAns = answers.myaso_ryba?.[q.id] || { text: '' };
+
+                return (
+                  <div
+                    key={q.id}
+                    className="bg-white rounded-2xl border border-stone-200 p-3.5 space-y-2.5 w-full max-w-full overflow-hidden"
+                  >
+                    <div className="text-[11px] text-stone-500">
+                      <span className="font-mono font-bold text-stone-800">
+                        {String(idx + 1).padStart(2, '0')}.
+                      </span>{' '}
+                      <span>{q.categoryLabel}</span>
+                    </div>
+
+                    <h3 className="text-sm font-bold text-stone-950 leading-snug break-words">
+                      {q.title}
+                    </h3>
+
+                    {/* Stacked comparison for mobile */}
+                    <div className="space-y-2 pt-1">
+                      {/* Byk block */}
+                      <div className="p-2.5 bg-amber-50/50 rounded-xl border border-amber-200/60">
+                        <div className="flex items-center justify-between text-xs font-bold text-amber-950 mb-1">
+                          <span>1. THE БЫК</span>
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-[10px] ${
+                              bykAns.rating === 'good'
+                                ? 'bg-emerald-600 text-white'
+                                : bykAns.rating === 'bad'
+                                ? 'bg-red-600 text-white'
+                                : 'text-stone-400'
+                            }`}
+                          >
+                            {bykAns.rating === 'good' ? 'Плюс' : bykAns.rating === 'bad' ? 'Минус' : 'Без оценки'}
+                          </span>
+                        </div>
+                        <textarea
+                          rows={2}
+                          value={bykAns.text}
+                          onChange={(e) =>
+                            handleUpdateAnswer('the_byk', q.id, { text: e.target.value })
+                          }
+                          placeholder="Ответ по THE БЫК..."
+                          className="w-full p-2 text-xs bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-stone-900"
+                        />
+                        <div className="flex items-center gap-1 mt-1">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleUpdateAnswer('the_byk', q.id, {
+                                rating: bykAns.rating === 'good' ? undefined : 'good',
+                              })
+                            }
+                            className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                              bykAns.rating === 'good' ? 'bg-emerald-700 text-white' : 'bg-stone-200 text-stone-700'
+                            }`}
+                          >
+                            + Плюс
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleUpdateAnswer('the_byk', q.id, {
+                                rating: bykAns.rating === 'bad' ? undefined : 'bad',
+                              })
+                            }
+                            className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                              bykAns.rating === 'bad' ? 'bg-red-700 text-white' : 'bg-stone-200 text-stone-700'
+                            }`}
+                          >
+                            − Минус
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Myaso&Ryba block */}
+                      <div className="p-2.5 bg-teal-50/50 rounded-xl border border-teal-200/60">
+                        <div className="flex items-center justify-between text-xs font-bold text-teal-950 mb-1">
+                          <span>2. Мясо&Рыба</span>
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-[10px] ${
+                              mrAns.rating === 'good'
+                                ? 'bg-emerald-600 text-white'
+                                : mrAns.rating === 'bad'
+                                ? 'bg-red-600 text-white'
+                                : 'text-stone-400'
+                            }`}
+                          >
+                            {mrAns.rating === 'good' ? 'Плюс' : mrAns.rating === 'bad' ? 'Минус' : 'Без оценки'}
+                          </span>
+                        </div>
+                        <textarea
+                          rows={2}
+                          value={mrAns.text}
+                          onChange={(e) =>
+                            handleUpdateAnswer('myaso_ryba', q.id, { text: e.target.value })
+                          }
+                          placeholder="Ответ по Мясо&Рыба..."
+                          className="w-full p-2 text-xs bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-stone-900"
+                        />
+                        <div className="flex items-center gap-1 mt-1">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleUpdateAnswer('myaso_ryba', q.id, {
+                                rating: mrAns.rating === 'good' ? undefined : 'good',
+                              })
+                            }
+                            className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                              mrAns.rating === 'good' ? 'bg-emerald-700 text-white' : 'bg-stone-200 text-stone-700'
+                            }`}
+                          >
+                            + Плюс
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleUpdateAnswer('myaso_ryba', q.id, {
+                                rating: mrAns.rating === 'bad' ? undefined : 'bad',
+                              })
+                            }
+                            className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                              mrAns.rating === 'bad' ? 'bg-red-700 text-white' : 'bg-stone-200 text-stone-700'
+                            }`}
+                          >
+                            − Минус
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* DESKTOP TABLE VIEW (On tablet/desktop screens with ample width) */}
+            <div className="hidden sm:block bg-white rounded-2xl border border-stone-200 overflow-hidden w-full">
+              <div className="overflow-x-auto w-full">
                 <table className="w-full text-left border-collapse min-w-[640px]">
                   <thead>
                     <tr className="border-b border-stone-200 bg-stone-100/80 text-xs font-semibold text-stone-700">
-                      <th className="py-3.5 px-4 w-[32%]">Вопрос соискателя</th>
-                      <th className="py-3.5 px-4 w-[34%] border-l border-stone-200">
-                        1. THE БЫК (Ответ и оценка)
+                      <th className="py-3 px-3.5 w-[32%]">Вопрос</th>
+                      <th className="py-3 px-3.5 w-[34%] border-l border-stone-200">
+                        1. THE БЫК
                       </th>
-                      <th className="py-3.5 px-4 w-[34%] border-l border-stone-200">
-                        2. Мясо&Рыба (Ответ и оценка)
+                      <th className="py-3 px-3.5 w-[34%] border-l border-stone-200">
+                        2. Мясо&Рыба
                       </th>
                     </tr>
                   </thead>
@@ -1029,37 +1166,30 @@ export default function App() {
 
                       return (
                         <tr key={q.id} className="hover:bg-stone-50/60 transition-colors align-top">
-                          <td className="p-3.5 sm:p-4">
-                            <div className="text-xs text-stone-500 mb-1">
+                          <td className="p-3">
+                            <div className="text-[11px] text-stone-500 mb-1">
                               <span className="font-mono tabular-nums font-semibold text-stone-700">
                                 {String(idx + 1).padStart(2, '0')}.
                               </span>{' '}
                               <span>{q.categoryLabel}</span>
-                              {q.isUserProvided && (
-                                <>
-                                  {' · '}
-                                  <span className="text-amber-800">Базовый</span>
-                                </>
-                              )}
                             </div>
-                            <div className="font-semibold text-stone-950 text-sm leading-snug">
+                            <div className="font-semibold text-stone-950 text-xs sm:text-sm leading-snug">
                               {q.title}
                             </div>
                             <div className="text-xs text-stone-500 mt-1">{q.hint}</div>
                           </td>
 
-                          {/* Column 1: THE БЫК */}
-                          <td className="p-3.5 sm:p-4 border-l border-stone-200">
+                          <td className="p-3 border-l border-stone-200">
                             <textarea
                               rows={2}
                               value={bykAns.text}
                               onChange={(e) =>
                                 handleUpdateAnswer('the_byk', q.id, { text: e.target.value })
                               }
-                              placeholder="Впишите ответ по THE БЫК..."
-                              className="w-full p-2.5 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
+                              placeholder="Ответ по THE БЫК..."
+                              className="w-full p-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-stone-900"
                             />
-                            <div className="flex items-center gap-1.5 mt-1.5">
+                            <div className="flex items-center gap-1.5 mt-1">
                               <button
                                 type="button"
                                 onClick={() =>
@@ -1067,7 +1197,7 @@ export default function App() {
                                     rating: bykAns.rating === 'good' ? undefined : 'good',
                                   })
                                 }
-                                className={`px-2 py-1 rounded text-[11px] font-medium ${
+                                className={`px-2 py-0.5 rounded text-[11px] font-medium ${
                                   bykAns.rating === 'good'
                                     ? 'bg-emerald-700 text-white'
                                     : 'bg-stone-100 text-stone-600'
@@ -1082,7 +1212,7 @@ export default function App() {
                                     rating: bykAns.rating === 'bad' ? undefined : 'bad',
                                   })
                                 }
-                                className={`px-2 py-1 rounded text-[11px] font-medium ${
+                                className={`px-2 py-0.5 rounded text-[11px] font-medium ${
                                   bykAns.rating === 'bad'
                                     ? 'bg-red-700 text-white'
                                     : 'bg-stone-100 text-stone-600'
@@ -1093,18 +1223,17 @@ export default function App() {
                             </div>
                           </td>
 
-                          {/* Column 2: Мясо&Рыба */}
-                          <td className="p-3.5 sm:p-4 border-l border-stone-200">
+                          <td className="p-3 border-l border-stone-200">
                             <textarea
                               rows={2}
                               value={mrAns.text}
                               onChange={(e) =>
                                 handleUpdateAnswer('myaso_ryba', q.id, { text: e.target.value })
                               }
-                              placeholder="Впишите ответ по Мясо&Рыба..."
-                              className="w-full p-2.5 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
+                              placeholder="Ответ по Мясо&Рыба..."
+                              className="w-full p-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-stone-900"
                             />
-                            <div className="flex items-center gap-1.5 mt-1.5">
+                            <div className="flex items-center gap-1.5 mt-1">
                               <button
                                 type="button"
                                 onClick={() =>
@@ -1112,7 +1241,7 @@ export default function App() {
                                     rating: mrAns.rating === 'good' ? undefined : 'good',
                                   })
                                 }
-                                className={`px-2 py-1 rounded text-[11px] font-medium ${
+                                className={`px-2 py-0.5 rounded text-[11px] font-medium ${
                                   mrAns.rating === 'good'
                                     ? 'bg-emerald-700 text-white'
                                     : 'bg-stone-100 text-stone-600'
@@ -1127,7 +1256,7 @@ export default function App() {
                                     rating: mrAns.rating === 'bad' ? undefined : 'bad',
                                   })
                                 }
-                                className={`px-2 py-1 rounded text-[11px] font-medium ${
+                                className={`px-2 py-0.5 rounded text-[11px] font-medium ${
                                   mrAns.rating === 'bad'
                                     ? 'bg-red-700 text-white'
                                     : 'bg-stone-100 text-stone-600'
@@ -1147,90 +1276,88 @@ export default function App() {
           </section>
         )}
 
-        {/* Footer Utility Actions */}
-        <footer className="mt-10 pt-6 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500">
-          <div>
-            Все ответы автоматически сохраняются в памяти вашего браузера на телефоне.
+        {/* Footer Actions */}
+        <footer className="mt-8 pt-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-500 w-full">
+          <div className="text-center sm:text-left">
+            Ответы сохраняются автоматически в браузере телефона.
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setConfirmClearModal(true)}
-              className="min-h-[38px] px-3 py-1.5 rounded-xl border border-stone-200 text-stone-600 hover:text-red-700 hover:border-red-200 flex items-center gap-1.5 transition-colors"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Очистить все ответы</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setConfirmClearModal(true)}
+            className="min-h-[36px] px-3 py-1.5 rounded-xl border border-stone-200 text-stone-600 hover:text-red-700 flex items-center gap-1.5 transition-colors"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Очистить ответы</span>
+          </button>
         </footer>
       </main>
 
-      {/* Mobile Fixed Bottom Navigation Bar (Thumb Zone) */}
+      {/* Mobile Fixed Bottom Navigation Bar with safe-area padding */}
       <nav
         aria-label="Переключение разделов"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 grid grid-cols-3 items-center h-14 px-2"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 grid grid-cols-3 items-center h-14 pb-safe px-1 w-full max-w-full"
       >
         <button
           onClick={() => setActiveTab('the_byk')}
-          className={`h-full flex flex-col items-center justify-center transition-colors ${
+          className={`h-full flex flex-col items-center justify-center transition-colors min-w-0 ${
             activeTab === 'the_byk' ? 'text-amber-800 font-bold' : 'text-stone-500'
           }`}
         >
           <div className="flex items-center gap-1">
-            <ClipboardList className="w-4 h-4" />
-            <span className="text-xs">THE БЫК</span>
+            <ClipboardList className="w-3.5 h-3.5 shrink-0" />
+            <span className="text-xs truncate">THE БЫК</span>
           </div>
           <span className="text-[10px] font-mono tabular-nums">
-            {bykStats.answeredCount}/{bykStats.totalCount} отв.
+            {bykStats.answeredCount}/{bykStats.totalCount}
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab('myaso_ryba')}
-          className={`h-full flex flex-col items-center justify-center transition-colors ${
+          className={`h-full flex flex-col items-center justify-center transition-colors min-w-0 ${
             activeTab === 'myaso_ryba' ? 'text-teal-800 font-bold' : 'text-stone-500'
           }`}
         >
           <div className="flex items-center gap-1">
-            <ClipboardList className="w-4 h-4" />
-            <span className="text-xs">Мясо&Рыба</span>
+            <ClipboardList className="w-3.5 h-3.5 shrink-0" />
+            <span className="text-xs truncate">Мясо&Рыба</span>
           </div>
           <span className="text-[10px] font-mono tabular-nums">
-            {mrStats.answeredCount}/{mrStats.totalCount} отв.
+            {mrStats.answeredCount}/{mrStats.totalCount}
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab('compare')}
-          className={`h-full flex flex-col items-center justify-center transition-colors ${
+          className={`h-full flex flex-col items-center justify-center transition-colors min-w-0 ${
             activeTab === 'compare' ? 'text-stone-950 font-bold' : 'text-stone-500'
           }`}
         >
           <div className="flex items-center gap-1">
-            <ArrowLeftRight className="w-4 h-4" />
-            <span className="text-xs">Сравнить</span>
+            <ArrowLeftRight className="w-3.5 h-3.5 shrink-0" />
+            <span className="text-xs truncate">Сравнить</span>
           </div>
-          <span className="text-[10px]">Сводная таблица</span>
+          <span className="text-[10px]">Итоги</span>
         </button>
       </nav>
 
-      {/* Confirmation Modal for Reset */}
+      {/* Confirmation Modal */}
       {confirmClearModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-5 border border-stone-200 shadow-xl">
-            <h3 className="text-base font-bold text-stone-950">Очистить все внесенные ответы?</h3>
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-3">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-4 sm:p-5 border border-stone-200 shadow-xl">
+            <h3 className="text-sm sm:text-base font-bold text-stone-950">Очистить все ответы?</h3>
             <p className="text-xs text-stone-600 mt-1.5 leading-relaxed">
-              Это удалит записанные ответы по ресторанам «THE БЫК» и «Мясо&Рыба». Сами вопросы останутся на месте.
+              Это удалит записанные ответы по обоим ресторанам. Сами вопросы останутся на месте.
             </p>
-            <div className="mt-5 flex items-center justify-end gap-2">
+            <div className="mt-4 flex items-center justify-end gap-2">
               <button
                 onClick={() => setConfirmClearModal(false)}
-                className="min-h-[40px] px-4 py-2 rounded-xl text-xs font-medium bg-stone-100 text-stone-700 hover:bg-stone-200"
+                className="min-h-[38px] px-3.5 py-1.5 rounded-xl text-xs font-medium bg-stone-100 text-stone-700 hover:bg-stone-200"
               >
                 Отмена
               </button>
               <button
                 onClick={handleResetAll}
-                className="min-h-[40px] px-4 py-2 rounded-xl text-xs font-medium bg-red-700 text-white hover:bg-red-800"
+                className="min-h-[38px] px-3.5 py-1.5 rounded-xl text-xs font-medium bg-red-700 text-white hover:bg-red-800"
               >
                 Да, очистить
               </button>

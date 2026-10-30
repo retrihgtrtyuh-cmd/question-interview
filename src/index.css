@@ -1,9 +1,25 @@
 @import "tailwindcss";
 
 @layer base {
-  body {
-    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
   }
+
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #root {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
   .font-mono {
     font-family: 'JetBrains Mono', monospace;
     font-variant-numeric: tabular-nums;
@@ -21,4 +37,9 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* iOS Safe Area Padding */
+.pb-safe {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
 }
